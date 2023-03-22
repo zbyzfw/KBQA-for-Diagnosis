@@ -3,10 +3,11 @@ import json
 import flask
 import pickle
 import numpy as np
-from gevent import pywsgi
+# from gevent import pywsgi
 import tensorflow as tf 
 import keras
-from keras.backend.tensorflow_backend import set_session
+# from keras.backend.tensorflow_backend import set_session
+from tensorflow.keras.backend import set_session
 from bert4keras.backend import keras
 from bert4keras.tokenizers import Tokenizer
 from bert4keras.snippets import sequence_padding
@@ -25,16 +26,19 @@ set_session(sess)
 class BertIntentModel(object):
     def __init__(self):
         super(BertIntentModel, self).__init__()
-        self.dict_path = 'E:/bert_weight_files/roberta/vocab.txt'
-        self.config_path='E:/bert_weight_files/roberta/bert_config_rbt3.json'
-        self.checkpoint_path='E:/bert_weight_files/roberta/bert_model.ckpt'
-
+        self.dict_path = 'E:\\projects\\nlp\\KBQA-for-Diagnosis\\bert_file\\vocab.txt'
+        self.config_path='E:\\projects\\nlp\\KBQA-for-Diagnosis\\bert_file\\bert_config_rbt3.json'
+        self.checkpoint_path='E:\\projects\\nlp\\KBQA-for-Diagnosis\\bert_file\\bert_model.ckpt.data-00000-of-00001'
+        # 标签
         self.label_list = [line.strip() for line in open('label','r',encoding='utf8')]
+        # 组成id:label字典
         self.id2label = {idx:label for idx,label in enumerate(self.label_list)}
-
+        # 向量化
         self.tokenizer = Tokenizer(self.dict_path)
+        # 加载bert预训练模型
         self.model = build_bert_model(self.config_path,self.checkpoint_path,13)
-        self.model.load_weights('./checkpoint/best_model.weights')
+        # 加载训练好的权重
+        self.model.load_weights('E:\\projects\\nlp\\KBQA-for-Diagnosis\\bert_file\\best_model.weights')
 
     def predict(self,text):
         token_ids, segment_ids = self.tokenizer.encode(text, maxlen=60)
@@ -49,27 +53,27 @@ BIM = BertIntentModel()
 
 
 if __name__ == '__main__':
-    app = flask.Flask(__name__)
+    # app = flask.Flask(__name__)
+    #
+    # @app.route("/service/api/bert_intent_recognize",methods=["GET","POST"])
+    # def bert_intent_recognize():
+    #     data = {"sucess":0}
+    #     result = None
+    #     param = flask.request.get_json()
+    #     print(param)
+    #     text = param["text"]
+    #     with graph.as_default():
+    #         set_session(sess)
+    #         result = BIM.predict(text)
+    #
+    #     data["data"] = result
+    #     data["sucess"] = 1
+    #
+    #     return flask.jsonify(data)
+    #
+    # server = pywsgi.WSGIServer(("0.0.0.0",60062), app)
+    # server.serve_forever()
 
-    @app.route("/service/api/bert_intent_recognize",methods=["GET","POST"])
-    def bert_intent_recognize():
-        data = {"sucess":0}
-        result = None
-        param = flask.request.get_json()
-        print(param)
-        text = param["text"]
-        with graph.as_default():
-            set_session(sess)
-            result = BIM.predict(text)
 
-        data["data"] = result
-        data["sucess"] = 1
-
-        return flask.jsonify(data)
-
-    server = pywsgi.WSGIServer(("0.0.0.0",60062), app)
-    server.serve_forever()
-
-
-    # r = BIM.predict("淋球菌性尿道炎的症状")
-    # print(r)
+    r = BIM.predict("淋球菌性尿道炎的症状")
+    print(r)

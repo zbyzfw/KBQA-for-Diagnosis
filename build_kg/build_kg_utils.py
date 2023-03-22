@@ -28,7 +28,7 @@ class MedicalExtractor(object):
             host="127.0.0.1",
             http_port=7474,
             user="neo4j",
-            password="123456")
+            password="zzzz")
 
         # 共8类节点
         self.drugs = [] # 药品

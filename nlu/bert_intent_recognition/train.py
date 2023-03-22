@@ -40,6 +40,7 @@ class data_generator(DataGenerator):
                 yield [batch_token_ids, batch_segment_ids], batch_labels
                 batch_token_ids, batch_segment_ids, batch_labels = [], [], []
 
+
 if __name__ == '__main__':
     # 加载数据集
     train_data = load_data('./data/train.csv')
@@ -51,12 +52,13 @@ if __name__ == '__main__':
 
     model = build_bert_model(config_path,checkpoint_path,class_nums)
     print(model.summary())
+    # 配置训练参数
     model.compile(
         loss='sparse_categorical_crossentropy',
         optimizer=Adam(5e-6), 
         metrics=['accuracy'],
     )
-
+    # 提前结束训练
     earlystop = keras.callbacks.EarlyStopping(
         monitor='val_loss', 
         patience=3, 
@@ -64,6 +66,7 @@ if __name__ == '__main__':
         mode='min'
         )
     bast_model_filepath = './checkpoint/best_model.weights'
+    # 模型保存
     checkpoint = keras.callbacks.ModelCheckpoint(
         bast_model_filepath, 
         monitor='val_loss', 
@@ -76,7 +79,7 @@ if __name__ == '__main__':
         train_generator.forfit(),
         steps_per_epoch=len(train_generator),
         epochs=10,
-        validation_data=test_generator.forfit(), 
+        validation_data=test_generator.forfit(),
         validation_steps=len(test_generator),
         shuffle=True, 
         callbacks=[earlystop,checkpoint]
